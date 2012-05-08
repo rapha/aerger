@@ -25,7 +25,7 @@ module Of(Argv : sig val argv : string array end) : ArgsOf = struct
   exception RequiredArgMissing of string
   exception BadArgValue of string * string * string * exn
 
-  (* The user may need to mutate argv, so we re-evaluate each time. *)
+  (* The user may want to do dirty things to argv, like mutate it, so we re-evaluate each time. *)
   let arg_list () =
     (* Argv always begins with the name of the executable, which we want to exclude. *)
     List.tl (Array.to_list Argv.argv)
