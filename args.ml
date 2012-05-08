@@ -15,7 +15,7 @@ module type ArgsOf = sig
   exception BadArgValue of string * string * string * exn (* value, name, description, exception *)
 
   val get : 'a arg -> 'a option
-  val get_or_default : 'a arg -> 'a -> 'a
+  val get_or_default : 'a -> 'a arg -> 'a
   val require : 'a arg -> 'a
 
   val rest : unit -> string list
@@ -51,7 +51,7 @@ module Of(Argv : sig val argv : string array end) : ArgsOf = struct
       end
     | None -> None
 
-  let get_or_default spec default =
+  let get_or_default default spec =
     match get spec with
     | Some value -> value
     | None -> default

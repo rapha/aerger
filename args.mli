@@ -20,7 +20,7 @@ module type ArgsOf = sig
   val get : 'a arg -> 'a option
 
   (* Returns the value of the given arg, or a default if not found. *)
-  val get_or_default : 'a arg -> 'a -> 'a
+  val get_or_default : 'a -> 'a arg -> 'a
 
   (* Returns the value of the given arg, or raises RequiredArgMissing if not found. *)
   val require : 'a arg -> 'a

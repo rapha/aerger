@@ -18,8 +18,8 @@ let _ =
   assert (get ["value"; "-some"] some_arg = None);
   assert (get ["-some"; "value"] some_arg = Some "value");
   assert (get ["-color"; "red"] (Args.enum "color" "a color" ["red"; "green"; "blue"]) = Some "red");
-  assert (get_or_default [] some_arg "otherwise" = "otherwise");
-  assert (get_or_default ["-some"; "value"] some_arg "otherwise" = "value");
+  assert (get_or_default [] "otherwise" some_arg = "otherwise");
+  assert (get_or_default ["-some"; "value"] "otherwise" some_arg = "value");
   assert (try (ignore (require [] some_arg); false) with _ -> true);
   assert (require ["-some"; "value"] some_arg = "value");
   assert (try (ignore (get ["-num"; "not a number"] (Args.float "num" "not a number")); false) with _ -> true);
