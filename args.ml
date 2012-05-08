@@ -2,15 +2,17 @@ type 'a arg = { name: string; desc: string; of_string: (string -> 'a) }
 
 let custom ~name ~desc ~of_string = { name; desc; of_string }
 (* TODO: Allow 1 and 0 for boolean args. *)
-let bool = custom ~of_string:bool_of_string
-let float = custom ~of_string:float_of_string
-let int = custom ~of_string:int_of_string
-let string = custom ~of_string:(fun s -> s)
-let enum ~name ~desc ~values = custom ~name ~desc ~of_string:(fun s -> if List.mem s values then s else invalid_arg s)
+let bool ~name ~desc = custom ~name ~desc:("A bool: " ^ desc) ~of_string:bool_of_string
+let float ~name ~desc = custom ~name ~desc:("A float: " ^ desc) ~of_string:float_of_string
+let int ~name ~desc = custom ~name ~desc:("A int: " ^ desc) ~of_string:int_of_string
+let string ~name ~desc = custom ~name ~desc:("A string: " ^ desc) ~of_string:(fun s -> s)
+let enum ~name ~desc ~values = custom ~name
+                                      ~desc:(Printf.sprintf "Any of {%s}: %s" (String.concat ", " values) desc)
+                                      ~of_string:(fun s -> if List.mem s values then s else invalid_arg s)
 
 module type ArgsOf = sig
-  exception RequiredArgMissing of string * string (* name, description *)
-  exception BadArgValue of string * string * string * exn (* name, value, description, exception *)
+  exception RequiredArgMissing of string (* name, description *)
+  exception BadArgValue of string * string * string * exn (* value, name, description, exception *)
 
   val get : 'a arg -> 'a option
   val get_or_default : 'a arg -> 'a -> 'a
@@ -20,10 +22,10 @@ module type ArgsOf = sig
 end
 
 module Of(Argv : sig val argv : string array end) : ArgsOf = struct
-  exception RequiredArgMissing of string * string
+  exception RequiredArgMissing of string
   exception BadArgValue of string * string * string * exn
 
-  (* Re-evaluate argv every time so the user can do dirty things to it, like mutation. *)
+  (* The user may need to mutate argv, so we re-evaluate each time. *)
   let arg_list () =
     (* Argv always begins with the name of the executable, which we want to exclude. *)
     List.tl (Array.to_list Argv.argv)
@@ -45,7 +47,7 @@ module Of(Argv : sig val argv : string array end) : ArgsOf = struct
     match find_given_value spec with
     | Some str -> begin
         try Some (spec.of_string str)
-        with e -> raise (BadArgValue (spec.name, str, spec.desc, e))
+        with e -> raise (BadArgValue (str, spec.name, spec.desc, e))
       end
     | None -> None
 
@@ -57,7 +59,7 @@ module Of(Argv : sig val argv : string array end) : ArgsOf = struct
   let require spec =
     match get spec with
     | Some value -> value
-    | None -> raise (RequiredArgMissing (spec.name, spec.desc))
+    | None -> raise (RequiredArgMissing spec.name)
 
   let rest () =
     (* TODO: Implement -- -a -b *)

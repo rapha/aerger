@@ -1,16 +1,9 @@
 open Printf
 
 let _ =
-  let go_faster = Args.bool ~name:"go_faster" ~desc:"Whether to go faster" in
-  let awesomeness =  Args.float ~name:"awesomeness" ~desc:"How awesome to be" in
-
-  let legal_colours = ["RED"; "GREEN"; "BLUE"] in
-
-  let colour = Args.enum
-      ~name:"colour"
-      ~desc:(sprintf "A primary colour, any of %s" (String.concat ", " legal_colours))
-      ~values:legal_colours
-  in
+  let go_faster = Args.bool ~name:"go_faster" ~desc:"Whether to go faster." in
+  let awesomeness =  Args.float ~name:"awesomeness" ~desc:"How awesome to be." in
+  let colour = Args.enum ~name:"colour" ~desc:"A primary colour." ~values:["RED"; "GREEN"; "BLUE"] in
 
   let module Args = Args.Of(Sys) in
 

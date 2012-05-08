@@ -13,8 +13,8 @@ val custom : name:string -> desc:string -> of_string:(string -> 'a) -> 'a arg
 
 (* Describes a module which extracts args from some argv. *)
 module type ArgsOf = sig
-  exception RequiredArgMissing of string * string (* name, description *)
-  exception BadArgValue of string * string * string * exn (* name, value, description, exception *)
+  exception RequiredArgMissing of string (* name *)
+  exception BadArgValue of string * string * string * exn (* value, name, description, exception *)
 
   (* Attempts to find the value of the given arg, returning Some value if found, or None otherwise. *)
   val get : 'a arg -> 'a option
