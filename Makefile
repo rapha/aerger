@@ -1,11 +1,11 @@
 run_test: test
 	./test
 
-test: args.cmi args.cmo test.cmo
-	ocamlc args.cmo test.cmo -o test
+test: aerger.cmi aerger.cmo test.cmo
+	ocamlc aerger.cmo test.cmo -o test
 
-demo: args.cmi args.cmo demo.cmo
-	ocamlc args.cmo demo.cmo -o demo
+demo: aerger.cmi aerger.cmo demo.cmo
+	ocamlc aerger.cmo demo.cmo -o demo
 
 clean:
 	rm -f .depend *.cm? demo test
