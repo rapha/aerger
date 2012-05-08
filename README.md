@@ -1,7 +1,5 @@
 A little library for parsing command-line args.
 
-## Demo
-
     let _ =
       let awesomeness, colour, speed = Aerger.(
         require (float "awesomeness" ~desc:"How awesome to be."),
