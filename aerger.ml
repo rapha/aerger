@@ -10,8 +10,8 @@ let enum ~name ~desc ~values = custom ~name
                                       ~desc:(Printf.sprintf "Any of {%s}: %s" (String.concat ", " values) desc)
                                       ~of_string:(fun s -> if List.mem s values then s else invalid_arg s)
 
-module type ArgsOf = sig
-  exception RequiredArgMissing of string (* name, description *)
+module type ArgAccess = sig
+  exception RequiredArgMissing of string (* name *)
   exception BadArgValue of string * string * string * exn (* value, name, description, exception *)
 
   val get : 'a arg -> 'a option
@@ -21,7 +21,7 @@ module type ArgsOf = sig
   val rest : unit -> string list
 end
 
-module Of(Argv : sig val argv : string array end) : ArgsOf = struct
+module On(Argv : sig val argv : string array end) : ArgAccess = struct
   exception RequiredArgMissing of string
   exception BadArgValue of string * string * string * exn
 
@@ -74,4 +74,4 @@ module Of(Argv : sig val argv : string array end) : ArgsOf = struct
 
 end
 
-include Of(Sys)
+include On(Sys)

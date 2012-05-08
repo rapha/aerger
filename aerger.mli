@@ -12,7 +12,7 @@ val enum : name:string -> desc:string -> values:string list -> string arg
 val custom : name:string -> desc:string -> of_string:(string -> 'a) -> 'a arg
 
 (* Describes a module which extracts args from some argv. *)
-module type ArgsOf = sig
+module type ArgAccess = sig
   exception RequiredArgMissing of string (* name *)
   exception BadArgValue of string * string * string * exn (* value, name, description, exception *)
 
@@ -30,7 +30,7 @@ module type ArgsOf = sig
 end
 
 (* Use this to construct modules for your own argv. *)
-module Of(Argv : sig val argv : string array end) : ArgsOf
+module On(Argv : sig val argv : string array end) : ArgAccess
 
 (* The included implementation uses the Sys.argv. *)
-include ArgsOf
+include ArgAccess

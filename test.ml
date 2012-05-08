@@ -2,16 +2,16 @@ let _ =
   let some_arg = Aerger.string ~name:"some" ~desc:"desc" in
 
   let get argv =
-    let module A = Aerger.Of(struct let argv = (Array.of_list ("cmd" :: argv)) end) in A.get
+    let module A = Aerger.On(struct let argv = (Array.of_list ("cmd" :: argv)) end) in A.get
   in
   let get_or argv =
-    let module A = Aerger.Of(struct let argv = (Array.of_list ("cmd" :: argv)) end) in A.get_or
+    let module A = Aerger.On(struct let argv = (Array.of_list ("cmd" :: argv)) end) in A.get_or
   in
   let require argv =
-    let module A = Aerger.Of(struct let argv = (Array.of_list ("cmd" :: argv)) end) in A.require
+    let module A = Aerger.On(struct let argv = (Array.of_list ("cmd" :: argv)) end) in A.require
   in
   let rest argv =
-    let module A = Aerger.Of(struct let argv = (Array.of_list ("cmd" :: argv)) end) in A.rest
+    let module A = Aerger.On(struct let argv = (Array.of_list ("cmd" :: argv)) end) in A.rest
   in
   assert (get [] some_arg = None);
   assert (get ["-some"] some_arg = None);
