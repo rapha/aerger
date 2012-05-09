@@ -1,3 +1,5 @@
+open Printf
+
 type 'a arg = { name: string; desc: string; of_string: (string -> 'a) }
 
 exception RequiredArgMissing of string (* name *)
@@ -19,6 +21,7 @@ module type ArgAccess = sig
   val require : 'a arg -> 'a
   val is_given : 'a arg -> bool
   val rest : unit -> string list
+  val with_usage : string -> (unit -> 'a) -> 'a
 end
 
 module On(Argv : sig val argv : string array end) : ArgAccess = struct
@@ -74,6 +77,21 @@ module On(Argv : sig val argv : string array end) : ArgAccess = struct
     in
     find_unflagged_in (arg_list ())
 
+  let with_usage usage get_args =
+    let fail str =
+      prerr_string str;
+      exit 1
+    in
+    let usage = sprintf "%s %s" Argv.argv.(0) usage in
+    try
+      get_args ()
+    with
+    | RequiredArgMissing name ->
+        fail (sprintf "The '%s' arg is required.\n\nUsage: %s\n" name usage)
+    | BadArgValue (value, name, desc, exc) ->
+        fail (sprintf
+          "The value '%s' is invalid for arg '%s' (%s). %s.\n\nUsage: %s\n"
+          value name desc (Printexc.to_string exc) usage)
 end
 
 include On(Sys)

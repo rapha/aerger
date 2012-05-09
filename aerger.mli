@@ -30,6 +30,10 @@ module type ArgAccess = sig
 
   (* Returns all the args which do not directly follow args beginning with - *)
   val rest : unit -> string list
+
+  (* Convenience function which handles displaying a useful message
+   * if there is a problem extracting the arg values. *)
+  val with_usage : string -> (unit -> 'a) -> 'a (* usage_string -> function_returning_arg_values -> arg values *)
 end
 
 (* Use this to construct modules for your own argv. *)
