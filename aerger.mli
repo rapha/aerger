@@ -25,6 +25,9 @@ module type ArgAccess = sig
   (* Returns the value of the given arg, or raises RequiredArgMissing if not found. *)
   val require : 'a arg -> 'a
 
+  (* Returns whether a value was given for the given arg. *)
+  val is_given: 'a arg -> bool
+
   (* Returns all the args which do not directly follow args beginning with - *)
   val rest : unit -> string list
 end

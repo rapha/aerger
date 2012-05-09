@@ -13,6 +13,9 @@ let _ =
   let rest argv =
     let module A = Aerger.On(struct let argv = (Array.of_list ("cmd" :: argv)) end) in A.rest
   in
+  let is_given argv =
+    let module A = Aerger.On(struct let argv = (Array.of_list ("cmd" :: argv)) end) in A.is_given
+  in
   assert (get [] some_arg = None);
   assert (get ["-some"] some_arg = None);
   assert (get ["value"; "-some"] some_arg = None);
@@ -31,3 +34,6 @@ let _ =
     try let _ = get ["-color"; "yellow"] (Aerger.enum "color" "a color" ["red"; "green"; "blue"]) in false
     with Aerger.BadArgValue ("yellow", "color", "Any of {red, green, blue}: a color", Invalid_argument "yellow") -> true);
   assert (rest ["-some"; "value"; "a"; "-and"; "thing"; "b"; "c"] () = ["a"; "b"; "c"]);
+  assert (is_given [] some_arg = false);
+  assert (is_given ["-some"] some_arg = false);
+  assert (is_given ["-some"; "value"] some_arg = true);

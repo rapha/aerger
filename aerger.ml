@@ -17,6 +17,7 @@ module type ArgAccess = sig
   val get : 'a arg -> 'a option
   val get_or : 'a -> 'a arg -> 'a
   val require : 'a arg -> 'a
+  val is_given : 'a arg -> bool
   val rest : unit -> string list
 end
 
@@ -56,6 +57,11 @@ module On(Argv : sig val argv : string array end) : ArgAccess = struct
     match get spec with
     | Some value -> value
     | None -> raise (RequiredArgMissing spec.name)
+
+  let is_given spec =
+    match get spec with
+    | Some _ -> true
+    | None -> false
 
   let rest () =
     (* TODO: Implement -- -a -b *)
