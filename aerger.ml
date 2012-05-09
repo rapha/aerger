@@ -1,5 +1,8 @@
 type 'a arg = { name: string; desc: string; of_string: (string -> 'a) }
 
+exception RequiredArgMissing of string (* name *)
+exception BadArgValue of string * string * string * exn (* value, name, description, exception *)
+
 let custom ~name ~desc ~of_string = { name; desc; of_string }
 (* TODO: Allow 1 and 0 for boolean args. *)
 let bool ~name ~desc = custom ~name ~desc:("A bool: " ^ desc) ~of_string:bool_of_string
@@ -11,20 +14,13 @@ let enum ~name ~desc ~values = custom ~name
                                       ~of_string:(fun s -> if List.mem s values then s else invalid_arg s)
 
 module type ArgAccess = sig
-  exception RequiredArgMissing of string (* name *)
-  exception BadArgValue of string * string * string * exn (* value, name, description, exception *)
-
   val get : 'a arg -> 'a option
   val get_or : 'a -> 'a arg -> 'a
   val require : 'a arg -> 'a
-
   val rest : unit -> string list
 end
 
 module On(Argv : sig val argv : string array end) : ArgAccess = struct
-  exception RequiredArgMissing of string
-  exception BadArgValue of string * string * string * exn
-
   (* The user may want to do dirty things to argv, like mutate it, so we re-evaluate each time. *)
   let arg_list () =
     (* Argv always begins with the name of the executable, which we want to exclude. *)

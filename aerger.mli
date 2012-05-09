@@ -1,6 +1,9 @@
 (* Describes a command line arg with values of type 'a. *)
 type 'a arg
 
+exception RequiredArgMissing of string (* name *)
+exception BadArgValue of string * string * string * exn (* value, name, description, exception *)
+
 (* Constructors for args of the given types. *)
 val bool : name:string -> desc:string -> bool arg
 val float : name:string -> desc:string -> float arg
@@ -13,9 +16,6 @@ val custom : name:string -> desc:string -> of_string:(string -> 'a) -> 'a arg
 
 (* Describes a module which extracts args from some argv. *)
 module type ArgAccess = sig
-  exception RequiredArgMissing of string (* name *)
-  exception BadArgValue of string * string * string * exn (* value, name, description, exception *)
-
   (* Attempts to find the value of the given arg, returning Some value if found, or None otherwise. *)
   val get : 'a arg -> 'a option
 
