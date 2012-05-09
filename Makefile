@@ -1,7 +1,7 @@
 run_test: test
 	./test
 
-test: aerger.cmi aerger.cmo test.cmo
+test: aerger.cmo test.cmo
 	ocamlc aerger.cmo test.cmo -o test
 
 clean:
