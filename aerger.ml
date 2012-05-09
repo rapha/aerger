@@ -5,9 +5,19 @@ type 'a arg = { name: string; desc: string; of_string: (string -> 'a) }
 exception RequiredArgMissing of string (* name *)
 exception BadArgValue of string * string * string * exn (* value, name, description, exception *)
 
+(* Allow the user to provide "0", "1", "false" or "true" as valid values. *)
+let parse_bool str =
+  try bool_of_string str
+  with Invalid_argument _ -> begin
+    match try int_of_string str with Failure _ -> invalid_arg str with
+    | 0 -> false
+    | 1 -> true
+    | _ -> invalid_arg str
+  end
+
 let custom ~name ~desc ~of_string = { name; desc; of_string }
 (* TODO: Allow 1 and 0 for boolean args. *)
-let bool ~name ~desc = custom ~name ~desc:("A bool: " ^ desc) ~of_string:bool_of_string
+let bool ~name ~desc = custom ~name ~desc:("A bool: " ^ desc) ~of_string:parse_bool
 let float ~name ~desc = custom ~name ~desc:("A float: " ^ desc) ~of_string:float_of_string
 let int ~name ~desc = custom ~name ~desc:("A int: " ^ desc) ~of_string:int_of_string
 let string ~name ~desc = custom ~name ~desc:("A string: " ^ desc) ~of_string:(fun s -> s)
