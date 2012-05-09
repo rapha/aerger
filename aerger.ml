@@ -27,12 +27,12 @@ module On(Argv : sig val argv : string array end) : ArgAccess = struct
     (* Argv always begins with the name of the executable, which we want to exclude. *)
     List.tl (Array.to_list Argv.argv)
 
-  let find_given_value spec =
+  let find_given_value arg =
     (* TODO: implement
       * --name value
       * -name=value
     *)
-    let flag = "-" ^ (spec.name) in
+    let flag = "-" ^ (arg.name) in
     let rec find_value_in = function
       | [] | [_] -> None
       | name :: value :: _ when name = flag -> Some value
@@ -40,26 +40,26 @@ module On(Argv : sig val argv : string array end) : ArgAccess = struct
     in
     find_value_in (arg_list ())
 
-  let get spec =
-    match find_given_value spec with
+  let get arg =
+    match find_given_value arg with
     | Some str -> begin
-        try Some (spec.of_string str)
-        with e -> raise (BadArgValue (str, spec.name, spec.desc, e))
+        try Some (arg.of_string str)
+        with e -> raise (BadArgValue (str, arg.name, arg.desc, e))
       end
     | None -> None
 
-  let get_or default spec =
-    match get spec with
+  let get_or default arg =
+    match get arg with
     | Some value -> value
     | None -> default
 
-  let require spec =
-    match get spec with
+  let require arg =
+    match get arg with
     | Some value -> value
-    | None -> raise (RequiredArgMissing spec.name)
+    | None -> raise (RequiredArgMissing arg.name)
 
-  let is_given spec =
-    match get spec with
+  let is_given arg =
+    match get arg with
     | Some _ -> true
     | None -> false
 
