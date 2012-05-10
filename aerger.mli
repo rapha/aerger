@@ -11,12 +11,12 @@ val int : ?desc:string -> names:string list -> int arg
 val string : ?desc:string -> names:string list -> string arg
 val enum : ?desc:string -> names:string list -> values:string list -> string arg
 
-(* Can be any type, if you can provide a way to deserialise from string *)
+(* Can be any type, if you provide a mapping from strings. *)
 val custom : ?desc:string -> names:string list -> of_string:(string -> 'a) -> 'a arg
 
 (* Describes a module which extracts args from some argv. *)
 module type ArgAccess = sig
-  (* Attempts to find the value of the given arg, returning Some value if found, or None otherwise. *)
+  (* Finds the first value given for arg, returning Some value if found, or None otherwise. *)
   val get : 'a arg -> 'a option
 
   (* Returns the value of the given arg, or a default if not found. *)
