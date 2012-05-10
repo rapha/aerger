@@ -1,18 +1,18 @@
 (* Describes a command line arg with values of type 'a. *)
 type 'a arg
 
-exception RequiredArgMissing of string (* name *)
+exception RequiredArgMissing of string list (* name *)
 exception BadArgValue of string * string * string * exn (* value, name, description, exception *)
 
 (* Constructors for args of the given types. *)
-val bool : name:string -> desc:string -> bool arg
-val float : name:string -> desc:string -> float arg
-val int : name:string -> desc:string -> int arg
-val string : name:string -> desc:string -> string arg
-val enum : name:string -> desc:string -> values:string list -> string arg
+val bool : ?desc:string -> names:string list -> bool arg
+val float : ?desc:string -> names:string list -> float arg
+val int : ?desc:string -> names:string list -> int arg
+val string : ?desc:string -> names:string list -> string arg
+val enum : ?desc:string -> names:string list -> values:string list -> string arg
 
 (* Can be any type, if you can provide a way to deserialise from string *)
-val custom : name:string -> desc:string -> of_string:(string -> 'a) -> 'a arg
+val custom : ?desc:string -> names:string list -> of_string:(string -> 'a) -> 'a arg
 
 (* Describes a module which extracts args from some argv. *)
 module type ArgAccess = sig
