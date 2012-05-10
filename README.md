@@ -1,9 +1,12 @@
 A little library for parsing command-line args.
 
-    let awesomeness, colour, speed = Aerger.(
-      require (float "awesomeness" "How awesome to be."),
-      get_or "RED" (enum ~name:"colour" ~desc:"A primary colour." ~values:["RED"; "GREEN"; "BLUE"]),
-      match get (bool "go_faster" "Whether to go faster.") with Some true -> "fast" | Some false -> "slow" | None -> "?"
+    let awesomeness, speed, color = Aerger.(
+      with_usage "--awesomeness 99 --go_faster 1 -c BLUE" (fun _ ->
+        require (float ["awesomeness"]),
+        (match get (bool ["go_faster"]) with Some true -> "fast" | Some false -> "slow" | None -> "unspecified"),
+        get_or "RED" (enum ~names:["c"; "color"] ~desc:"A primary color." ~values:["RED"; "GREEN"; "BLUE"])
+      )
     ) in
-    Printf.printf "speed: %s\nawesomeness: %f\ncolour: %s\n" speed awesomeness colour;
+
+    Printf.printf "speed: %s\nawesomeness: %f\ncolour: %s\n" speed awesomeness color;
     List.iter print_endline (Aerger.rest ())
