@@ -40,7 +40,10 @@ module On(Argv : sig val argv : string array end) : ArgAccess = struct
     List.tl (Array.to_list Argv.argv)
 
   let find_given_value arg =
-    (* TODO: implement --name=value *)
+    (* TODO:
+      * implement --name=value
+      * raise error if the same arg is given more than once?
+      *)
     let flags = List.map ((^) "-") arg.names @ List.map ((^) "--") arg.names in
     let rec find_value_in = function
       | [] | [_] -> None
