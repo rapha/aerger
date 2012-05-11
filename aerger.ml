@@ -24,13 +24,27 @@ let enum ?(desc="") ~names ~values = custom ~desc:(Printf.sprintf "Any of {%s}. 
                                            ~names
                                            ~of_string:(fun s -> if List.mem s values then s else invalid_arg s)
 
+let with_usage usage get_args =
+  let fail str =
+    prerr_string str;
+    exit 1
+  in
+  try
+    get_args ()
+  with
+  | RequiredArgMissing names ->
+      fail (sprintf "The arg %s is required.\n\nUsage: %s\n" (String.concat " or " names) usage)
+  | BadArgValue (value, name, desc, exc) ->
+      fail (sprintf
+        "The value '%s' is invalid for arg '%s' (%s). %s.\n\nUsage: %s\n"
+        value name desc (Printexc.to_string exc) usage)
+
 module type ArgAccess = sig
   val get : 'a arg -> 'a option
   val get_or : 'a -> 'a arg -> 'a
   val require : 'a arg -> 'a
   val is_given : 'a arg -> bool
   val rest : unit -> string list
-  val with_usage : string -> (unit -> 'a) -> 'a
 end
 
 module On(Argv : sig val argv : string array end) : ArgAccess = struct
@@ -86,21 +100,6 @@ module On(Argv : sig val argv : string array end) : ArgAccess = struct
     | Some _ -> true
     | None -> false
 
-  let with_usage usage get_args =
-    let fail str =
-      prerr_string str;
-      exit 1
-    in
-    let usage = sprintf "%s %s" Argv.argv.(0) usage in
-    try
-      get_args ()
-    with
-    | RequiredArgMissing names ->
-        fail (sprintf "The arg %s is required.\n\nUsage: %s\n" (String.concat " or " names) usage)
-    | BadArgValue (value, name, desc, exc) ->
-        fail (sprintf
-          "The value '%s' is invalid for arg '%s' (%s). %s.\n\nUsage: %s\n"
-          value name desc (Printexc.to_string exc) usage)
 end
 
 include On(Sys)

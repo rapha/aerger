@@ -14,6 +14,10 @@ val enum : ?desc:string -> names:string list -> values:string list -> string arg
 (* Can be any type, if you provide a mapping from strings. *)
 val custom : ?desc:string -> names:string list -> of_string:(string -> 'a) -> 'a arg
 
+(* Convenience function which handles displaying a useful message
+ * if there is a problem extracting the arg values. *)
+val with_usage : string -> (unit -> 'a) -> 'a (* usage_string -> function_returning_arg_values -> arg values *)
+
 (* Describes a module which extracts args from some argv. *)
 module type ArgAccess = sig
   (* Finds the first value given for arg, returning Some value if found, or None otherwise. *)
@@ -30,10 +34,6 @@ module type ArgAccess = sig
 
   (* Returns all the args which do not directly follow args beginning with - *)
   val rest : unit -> string list
-
-  (* Convenience function which handles displaying a useful message
-   * if there is a problem extracting the arg values. *)
-  val with_usage : string -> (unit -> 'a) -> 'a (* usage_string -> function_returning_arg_values -> arg values *)
 end
 
 (* Use this to construct modules for your own argv. *)
