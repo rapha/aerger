@@ -21,8 +21,8 @@ let float ?(desc="") ~names = custom ~names ~desc:("A float. " ^ desc) ~of_strin
 let int ?(desc="") ~names = custom ~names ~desc:("A int. " ^ desc) ~of_string:int_of_string
 let string ?(desc="") ~names = custom ~names ~desc:("A string. " ^ desc) ~of_string:(fun s -> s)
 let enum ?(desc="") ~names ~values = custom ~desc:(Printf.sprintf "Any of {%s}. %s" (String.concat ", " values) desc)
-                                           ~names
-                                           ~of_string:(fun s -> if List.mem s values then s else invalid_arg s)
+                                            ~names
+                                            ~of_string:(fun s -> if List.mem s values then s else invalid_arg s)
 
 let with_usage usage get_args =
   let fail str =
@@ -39,6 +39,25 @@ let with_usage usage get_args =
         "The value '%s' is invalid for arg '%s' (%s). %s.\n\nUsage: %s\n"
         value name desc (Printexc.to_string exc) usage)
 
+(* We classify elements as either a name, a value or '--'
+ * and return a list of [ `NameValue | `Value ]'s *)
+let parse strings =
+  (* TODO: implement --name=value *)
+  let is_name = function "" | "--" -> false | str -> str.[0] = '-' in
+  let is_value str = not (is_name str) && str <> "--" in
+  let rec parse_rest = function
+    | [] -> []
+    | "--" :: rest ->
+        List.map (fun str -> `Value str) rest
+    | first :: rest when is_value first ->
+        `Value first :: parse_rest rest
+    | first :: second :: rest when is_name first && is_value second ->
+        `NameValue (first, second) :: parse_rest rest
+    | first :: rest -> (* first must be a name not followed by a value, so we drop it. *)
+        parse_rest rest
+  in
+  parse_rest strings
+
 module type ArgAccess = sig
   val get : 'a arg -> 'a option
   val get_or : 'a -> 'a arg -> 'a
@@ -48,37 +67,35 @@ module type ArgAccess = sig
 end
 
 module On(Argv : sig val argv : string array end) : ArgAccess = struct
-  (* The user may want to do dirty things to argv, like mutate it, so we re-evaluate each time. *)
-  let arg_list () =
-    (* Argv always begins with the name of the executable, which we want to exclude. *)
-    List.tl (Array.to_list Argv.argv)
+  let (|>) x f = f x
+
+  let parts () =
+    parse (
+      (* Argv always begins with the name of the executable, which we want to exclude. *)
+      List.tl (
+        (* The user may want to do dirty things to argv, so we re-evaluate each time. *)
+        Array.to_list Argv.argv))
 
   let rest () =
-    (* TODO: implement -- -a -b *)
-    let is_flag = function "" -> false | str -> str.[0] = '-' in
-    let rec find_unflagged_in = function
+    let rec values_in = function
       | [] -> []
-      | first :: [] when is_flag first -> []
-      | first :: _ :: rest when is_flag first -> find_unflagged_in rest
-      | first :: rest -> first :: find_unflagged_in rest
+      | `NameValue _ :: tail -> values_in tail
+      | `Value str :: tail -> str :: values_in tail
     in
-    find_unflagged_in (arg_list ())
+    values_in (parts ())
 
-  let find_given_value arg =
-    (* TODO:
-      * implement --name=value
-      * raise error if the same arg is given more than once?
-      *)
-    let flags = List.map ((^) "-") arg.names @ List.map ((^) "--") arg.names in
-    let rec find_value_in = function
-      | [] | [_] -> None
-      | name :: value :: _ when List.mem name flags -> Some (name, value)
-      | _ :: rest -> find_value_in rest
+  let given_value arg =
+    (* TODO: raise error if the same arg is given more than once? *)
+    let names = List.map ((^) "-") arg.names @ List.map ((^) "--") arg.names in
+    let rec find_in = function
+      | [] -> None
+      | `NameValue (name, value) :: _ when List.mem name names -> Some (name, value)
+      | `NameValue _ :: tail | `Value _ :: tail -> find_in tail
     in
-    find_value_in (arg_list ())
+    find_in (parts ())
 
   let get arg =
-    match find_given_value arg with
+    match given_value arg with
     | Some (name, str) -> begin
         try Some (arg.of_string str)
         with e -> raise (BadArgValue (str, name, arg.desc, e))

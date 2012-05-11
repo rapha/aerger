@@ -35,7 +35,7 @@ let _ =
   assert (
     try let _ = get ["-color"; "yellow"] (Aerger.enum ["color"] ["red"; "green"; "blue"]) in false
     with Aerger.BadArgValue ("yellow", "-color", "Any of {red, green, blue}. ", Invalid_argument "yellow") -> true);
-  assert (rest ["-some"; "value"; "a"; "-and"; "thing"; "b"; "c"] () = ["a"; "b"; "c"]);
+  assert (rest ["-some"; "value"; "a"; "--and"; "thing"; "b"; "c"; "-also"; "--"; "-d"; "e"] () = ["a"; "b"; "c"; "-d"; "e"]);
   assert (is_given [] some_arg = false);
   assert (is_given ["-some"] some_arg = false);
   assert (is_given ["-some"; "value"] some_arg = true);
