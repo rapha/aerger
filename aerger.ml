@@ -40,7 +40,7 @@ let with_usage usage get_args =
         value name desc (Printexc.to_string exc) usage)
 
 (* We classify elements as either a name, a value or '--'
- * and return a list of [ `NameValue | `Value ]'s *)
+ * and return a [> `NameValue of string * string | `Value of string ] list *)
 let parse strings =
   (* TODO: implement --name=value *)
   let is_name = function "" | "--" -> false | str -> str.[0] = '-' in
