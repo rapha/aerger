@@ -39,6 +39,17 @@ module On(Argv : sig val argv : string array end) : ArgAccess = struct
     (* Argv always begins with the name of the executable, which we want to exclude. *)
     List.tl (Array.to_list Argv.argv)
 
+  let rest () =
+    (* TODO: implement -- -a -b *)
+    let is_flag = function "" -> false | str -> str.[0] = '-' in
+    let rec find_unflagged_in = function
+      | [] -> []
+      | first :: [] when is_flag first -> []
+      | first :: _ :: rest when is_flag first -> find_unflagged_in rest
+      | first :: rest -> first :: find_unflagged_in rest
+    in
+    find_unflagged_in (arg_list ())
+
   let find_given_value arg =
     (* TODO:
       * implement --name=value
@@ -74,17 +85,6 @@ module On(Argv : sig val argv : string array end) : ArgAccess = struct
     match get arg with
     | Some _ -> true
     | None -> false
-
-  let rest () =
-    (* TODO: implement -- -a -b *)
-    let is_flag = function "" -> false | str -> str.[0] = '-' in
-    let rec find_unflagged_in = function
-      | [] -> []
-      | first :: [] when is_flag first -> []
-      | first :: _ :: rest when is_flag first -> find_unflagged_in rest
-      | first :: rest -> first :: find_unflagged_in rest
-    in
-    find_unflagged_in (arg_list ())
 
   let with_usage usage get_args =
     let fail str =
