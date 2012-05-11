@@ -39,24 +39,38 @@ let with_usage usage get_args =
         "The value '%s' is invalid for arg '%s' (%s). %s.\n\nUsage: %s\n"
         value name desc (Printexc.to_string exc) usage)
 
-(* We classify elements as either a name, a value or '--'
- * and return a [> `NameValue of string * string | `Value of string ] list *)
-let parse strings =
-  (* TODO: implement --name=value *)
-  let is_name = function "" | "--" -> false | str -> str.[0] = '-' in
-  let is_value str = not (is_name str) && str <> "--" in
-  let rec parse_rest = function
-    | [] -> []
-    | "--" :: rest ->
-        List.map (fun str -> `Value str) rest
-    | first :: rest when is_value first ->
-        `Value first :: parse_rest rest
-    | first :: second :: rest when is_name first && is_value second ->
-        `NameValue (first, second) :: parse_rest rest
-    | first :: rest -> (* first must be a name not followed by a value, so we drop it. *)
-        parse_rest rest
-  in
-  parse_rest strings
+module Parser = struct
+  let is_name = function
+    | "" | "--" -> false
+    | str -> str.[0] = '-' && not (String.contains str ' ')
+
+  let is_namevalue str = is_name str && (String.contains str '=')
+
+  let is_value str = not (is_name str) && str <> "--"
+
+  let split_namevalue str =
+    let index = String.index str '=' in
+    (String.sub str 0 index, String.sub str (index + 1) (String.length str - index - 1))
+
+  (* We classify elements as: a name, a value, a namevalue or '--'
+   * and return a [> `NameValue of string * string | `Value of string ] list *)
+  let parse strings =
+    (* TODO: implement --name=value *)
+    let rec parse_rest = function
+      | [] -> []
+      | "--" :: rest ->
+          List.map (fun str -> `Value str) rest
+      | first :: rest when is_value first ->
+          `Value first :: parse_rest rest
+      | first :: rest when is_namevalue first ->
+          `NameValue (split_namevalue first) :: parse_rest rest
+      | first :: second :: rest when is_name first && is_value second ->
+          `NameValue (first, second) :: parse_rest rest
+      | first :: rest -> (* first must be a name not followed by a value, so we drop it. *)
+          parse_rest rest
+    in
+    parse_rest strings
+end
 
 module type ArgAccess = sig
   val get : 'a arg -> 'a option
@@ -69,7 +83,7 @@ end
 module On(Argv : sig val argv : string array end) : ArgAccess = struct
 
   let parts () =
-    parse (
+    Parser.parse (
       (* Argv always begins with the name of the executable, which we want to exclude. *)
       List.tl (
         (* The user may want to do dirty things to argv, so we re-evaluate each time. *)

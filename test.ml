@@ -21,6 +21,7 @@ let _ =
   assert (get ["value"; "-some"] some_arg = None);
   assert (get ["-some"; "value"] some_arg = Some "value");
   assert (get ["--some"; "value"] some_arg = Some "value");
+  assert (get ["--some=value"] some_arg = Some "value");
   assert (get ["-color"; "red"] (Aerger.enum ["color"] ["red"; "green"; "blue"]) = Some "red");
   assert (get ["-run"; "0"] (Aerger.bool ["run"]) = Some false);
   assert (get_or [] "otherwise" some_arg = "otherwise");
