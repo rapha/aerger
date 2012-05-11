@@ -67,7 +67,6 @@ module type ArgAccess = sig
 end
 
 module On(Argv : sig val argv : string array end) : ArgAccess = struct
-  let (|>) x f = f x
 
   let parts () =
     parse (
