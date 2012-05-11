@@ -20,7 +20,7 @@ let bool ?(desc="") ~names = custom ~names ~desc:("A bool. " ^ desc) ~of_string:
 let float ?(desc="") ~names = custom ~names ~desc:("A float. " ^ desc) ~of_string:float_of_string
 let int ?(desc="") ~names = custom ~names ~desc:("A int. " ^ desc) ~of_string:int_of_string
 let string ?(desc="") ~names = custom ~names ~desc:("A string. " ^ desc) ~of_string:(fun s -> s)
-let enum ?(desc="") ~names ~values = custom ~desc:(Printf.sprintf "Any of {%s}. %s" (String.concat ", " values) desc)
+let enum ?(desc="") ~names ~values = custom ~desc:(sprintf "Any of {%s}. %s" (String.concat ", " values) desc)
                                             ~names
                                             ~of_string:(fun s -> if List.mem s values then s else invalid_arg s)
 
