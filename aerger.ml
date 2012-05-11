@@ -83,7 +83,7 @@ module On(Argv : sig val argv : string array end) : ArgAccess = struct
     in
     values_in (parts ())
 
-  let given_value arg =
+  let find arg =
     (* TODO: raise error if the same arg is given more than once? *)
     let names = List.map ((^) "-") arg.names @ List.map ((^) "--") arg.names in
     let rec find_in = function
@@ -94,7 +94,7 @@ module On(Argv : sig val argv : string array end) : ArgAccess = struct
     find_in (parts ())
 
   let get arg =
-    match given_value arg with
+    match find arg with
     | Some (name, str) -> begin
         try Some (arg.of_string str)
         with e -> raise (BadArgValue (str, name, arg.desc, e))
