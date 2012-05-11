@@ -55,7 +55,6 @@ module Parser = struct
   (* We classify elements as: a name, a value, a namevalue or '--'
    * and return a [> `NameValue of string * string | `Value of string ] list *)
   let parse strings =
-    (* TODO: implement --name=value *)
     let rec parse_rest = function
       | [] -> []
       | "--" :: rest ->
