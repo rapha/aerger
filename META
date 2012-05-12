@@ -1,0 +1,4 @@
+description = "A library for parsing command line arguments."
+requires = ""
+version = "0.1"
+archive(byte) = "aerger.cma"
