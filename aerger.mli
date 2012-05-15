@@ -6,9 +6,9 @@ exception BadArgValue of string option * string * string * exn (* value, name, d
 
 (* Arg constructors. *)
 val custom :
+  ?default:'a ->  (* An optional default value to use if the arg is not present. *)
   names:string list ->  (* The names of the arg, e.g. ["c"; "color"] to match -c and -color. *)
   desc:string ->  (* A description of the arg for the user. *)
-  default:'a option ->  (* An optional default value to use if the arg is not present. *)
   parse_value:(string option -> 'a) -> 'a arg  (* A function to convert the value given to the right type. There may be no value given. *)
 
 (* Common arg types *)

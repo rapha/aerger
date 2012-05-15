@@ -19,17 +19,18 @@ let parse_enum values = function
   | s when List.mem s values -> s
   | s -> invalid_arg s
 
-let custom ~names ~desc ~default ~parse_value = { names; desc; default; parse_value }
-let float ?default ?(desc="") ~names = custom ~names ~desc:("A float. " ^ desc) ~default ~parse_value:(some float_of_string)
-let int ?default ?(desc="") ~names = custom ~names ~desc:("A int. " ^ desc) ~default ~parse_value:(some int_of_string)
-let string ?default ?(desc="") ~names = custom ~names ~desc:("A string. " ^ desc) ~default ~parse_value:(some (fun s -> s))
+let custom ?default ~names ~desc ~parse_value = { names; desc; default; parse_value }
+let float ?default ?(desc="") ~names = custom ~names ~desc:("A float. " ^ desc) ?default ~parse_value:(some float_of_string)
+let int ?default ?(desc="") ~names = custom ~names ~desc:("A int. " ^ desc) ?default ~parse_value:(some int_of_string)
+let string ?default ?(desc="") ~names = custom ~names ~desc:("A string. " ^ desc) ?default ~parse_value:(some (fun s -> s))
 let bool ?default ?(desc="") ~names = custom ~names
                                              ~desc:("A bool. " ^ desc)
-                                             ~default:(match default with Some _ -> default | None -> Some false)
+                                             (* If a default value is not specified, an absent arg will have value false *)
+                                             ~default:(match default with Some b -> b | None -> false)
                                              ~parse_value:parse_bool
 let enum ?default ?(desc="") ~names ~values = custom ~names
                                                      ~desc:(sprintf "Any of {%s}. %s" (String.concat ", " values) desc)
-                                                     ~default
+                                                     ?default
                                                      ~parse_value:(some (parse_enum values))
 
 let with_usage usage get_args =
