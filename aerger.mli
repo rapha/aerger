@@ -1,36 +1,44 @@
 (* Describes a command line arg with values of type 'a. *)
 type 'a arg
 
-exception RequiredArgMissing of string list (* name *)
-exception BadArgValue of string * string * string * exn (* value, name, description, exception *)
+exception RequiredArgMissing of string list (* names *)
+exception BadArgValue of string option * string * string * exn (* value, name, description, exception *)
 
-(* Constructors for args of the given types. *)
-val bool : ?desc:string -> names:string list -> bool arg
-val float : ?desc:string -> names:string list -> float arg
-val int : ?desc:string -> names:string list -> int arg
-val string : ?desc:string -> names:string list -> string arg
-val enum : ?desc:string -> names:string list -> values:string list -> string arg
+(* Arg constructors. *)
+val custom :
+  names:string list ->  (* The names of the arg, e.g. ["c"; "color"] to match -c and -color. *)
+  desc:string ->  (* A description of the arg for the user. *)
+  default:'a option ->  (* An optional default value to use if the arg is not present. *)
+  parse_value:(string option -> 'a) -> 'a arg  (* A function to convert the value given to the right type. There may be no value given. *)
 
-(* Can be any type, if you provide a mapping from strings. *)
-val custom : ?desc:string -> names:string list -> of_string:(string -> 'a) -> 'a arg
+(* Common arg types *)
+val bool : ?default:bool option -> ?desc:string -> names:string list -> bool arg
+val float : ?default:float option -> ?desc:string -> names:string list -> float arg
+val int : ?default:int option -> ?desc:string -> names:string list -> int arg
+val string : ?default:string option -> ?desc:string -> names:string list -> string arg
+val enum : ?default:string option -> ?desc:string -> names:string list -> values:string list -> string arg
+
 
 (* Convenience function which handles displaying a useful message
- * if there is a problem extracting the arg values. *)
+ * if there is a problem getting the arg values. *)
 val with_usage : string -> (unit -> 'a) -> 'a (* usage_string -> function_returning_arg_values -> arg values *)
 
 (* Describes a module which extracts args from some argv. *)
 module type ArgAccess = sig
-  (* Finds the first value given for arg, returning Some value if found, or None otherwise. *)
+  (* Returns whether an arg is present. *)
+  val is_present: 'a arg -> bool
+
+  (* Finds the value given for this arg.
+   * Returns Some value if found, or the default otherwise.
+   * Raises BadArgValue if there was a problem parsing the given value. *)
   val get : 'a arg -> 'a option
 
-  (* Returns the value of the given arg, or a default if not found. *)
-  val get_or : 'a -> 'a arg -> 'a
-
-  (* Returns the value of the given arg, or raises RequiredArgMissing if not found. *)
+  (* Finds the value given for this arg.
+   * If found, returns Some value
+   * Otherwise if the default is not None, returns that.
+   * Otherwise raises RequiredArgMissing.
+   * Raises BadArgValue if there was a problem parsing the given value. *)
   val require : 'a arg -> 'a
-
-  (* Returns whether a value was given for the given arg. *)
-  val is_given: 'a arg -> bool
 
   (* Returns all the args which do not directly follow args beginning with - *)
   val rest : unit -> string list
