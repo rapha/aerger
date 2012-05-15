@@ -10,7 +10,7 @@ let some func = function
   | Some value -> func value
 
 let parse_bool = function
-  | None -> true  (* The arg was present, but no value given. We consider that implicitly true. *)
+  | None -> true  (* The arg was present, but no value given. Consider that implicitly true. *)
   | Some "true" | Some "1" -> true
   | Some "false" | Some "0" -> false
   | Some str -> invalid_arg str
@@ -46,12 +46,15 @@ let with_usage usage get_args =
         given_value name desc (Printexc.to_string exc) usage)
 
 module Parser = struct
+  (* Is the name of a user arg, e.g. -c *)
   let is_name = function
     | "" | "--" -> false
-    | str -> str.[0] = '-' && not (String.contains str ' ')
+    | str -> str.[0] = '-'
 
+  (* Is a name-value pair, e.g. -c=1 *)
   let is_namevalue str = is_name str && (String.contains str '=')
 
+  (* Is a normal value, e.g. 1 *)
   let is_value str = not (is_name str) && str <> "--"
 
   let split_namevalue str =

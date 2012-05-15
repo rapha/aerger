@@ -23,6 +23,7 @@ val enum : ?default:string option -> ?desc:string -> names:string list -> values
  * if there is a problem getting the arg values. *)
 val with_usage : string -> (unit -> 'a) -> 'a (* usage_string -> function_returning_arg_values -> arg values *)
 
+
 (* Describes a module which extracts args from some argv. *)
 module type ArgAccess = sig
   (* Returns whether an arg is present. *)
@@ -40,7 +41,7 @@ module type ArgAccess = sig
    * Raises BadArgValue if there was a problem parsing the given value. *)
   val require : 'a arg -> 'a
 
-  (* Returns all the args which do not directly follow args beginning with - *)
+  (* Returns all the element which are not values of some arg. *)
   val rest : unit -> string list
 end
 
