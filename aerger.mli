@@ -29,15 +29,11 @@ module type ArgAccess = sig
   (* Returns whether an arg is present. *)
   val is_present: 'a arg -> bool
 
-  (* Finds the value given for this arg.
-   * Returns Some value if found, or the default otherwise.
+  (* Returns Some value for the given arg (if present), or Some default (if specified), or None.
    * Raises BadArgValue if there was a problem parsing the given value. *)
   val get : 'a arg -> 'a option
 
-  (* Finds the value given for this arg.
-   * If found, returns Some value
-   * Otherwise if the default is not None, returns that.
-   * Otherwise raises RequiredArgMissing.
+  (* Returns Some value for the given arg (if present), or Some default (if specified), or raises RequiredArgMissing.
    * Raises BadArgValue if there was a problem parsing the given value. *)
   val require : 'a arg -> 'a
 
