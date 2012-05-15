@@ -12,11 +12,11 @@ val custom :
   parse_value:(string option -> 'a) -> 'a arg  (* A function to convert the value given to the right type. There may be no value given. *)
 
 (* Common arg types *)
-val bool : ?default:bool option -> ?desc:string -> names:string list -> bool arg
-val float : ?default:float option -> ?desc:string -> names:string list -> float arg
-val int : ?default:int option -> ?desc:string -> names:string list -> int arg
-val string : ?default:string option -> ?desc:string -> names:string list -> string arg
-val enum : ?default:string option -> ?desc:string -> names:string list -> values:string list -> string arg
+val bool : ?default:bool -> ?desc:string -> names:string list -> bool arg
+val float : ?default:float -> ?desc:string -> names:string list -> float arg
+val int : ?default:int -> ?desc:string -> names:string list -> int arg
+val string : ?default:string -> ?desc:string -> names:string list -> string arg
+val enum : ?default:string -> ?desc:string -> names:string list -> values:string list -> string arg
 
 
 (* Convenience function which handles displaying a useful message

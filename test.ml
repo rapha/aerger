@@ -1,5 +1,5 @@
 let _ =
-  let some_arg = Aerger.string ~names:["some"] ~desc:"desc" ~default:None in
+  let some_arg = Aerger.string ~names:["some"] ~desc:"Something" ?default:None in
 
   let get argv =
     let module A = Aerger.On(struct let argv = (Array.of_list ("cmd" :: argv)) end) in A.get
@@ -19,15 +19,15 @@ let _ =
   assert (get ["--some=value"] some_arg = Some "value");
   assert (get ["-color"; "red"] (Aerger.enum ["color"] ["red"; "green"; "blue"]) = Some "red");
   assert (get ["-run"; "0"] (Aerger.bool ["run"]) = Some false);
-  assert (get [] (Aerger.string ~default:(Some "otherwise") ~names:["some"] ~desc:"desc") = Some "otherwise");
-  assert (get ["-some"; "value"] (Aerger.string ~default:(Some "thing") ~names:["some"] ~desc:"desc") = Some "value");
+  assert (get [] (Aerger.string ~default:"otherwise" ~names:["some"] ~desc:"desc") = Some "otherwise");
+  assert (get ["-some"; "value"] (Aerger.string ~default:"thing" ~names:["some"] ~desc:"desc") = Some "value");
   assert (require ["-some"; "value"] some_arg = "value");
   assert (
     try let _ = require [] some_arg in false
     with Aerger.RequiredArgMissing ["some"] -> true);
   assert (
     try let _ = get ["-some"] some_arg in false
-    with Aerger.BadArgValue (None, "-some", "A string. desc", Invalid_argument("No value given")) -> true);
+    with Aerger.BadArgValue (None, "-some", "A string. Something", Invalid_argument("No value given")) -> true);
   assert (
     try let _ = get ["-num"; "not a number"] (Aerger.float ["num"]) in false
     with Aerger.BadArgValue (Some "not a number", "-num", "A float. ", Failure "float_of_string") -> true);
@@ -38,3 +38,4 @@ let _ =
   assert (is_present [] some_arg = false);
   assert (is_present ["-some"] some_arg = true);
   assert (is_present ["-some"; "value"] some_arg = true);
+  ()

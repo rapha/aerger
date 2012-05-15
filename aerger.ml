@@ -20,14 +20,17 @@ let parse_enum values = function
   | s -> invalid_arg s
 
 let custom ~names ~desc ~default ~parse_value = { names; desc; default; parse_value }
-let bool ?(default=(Some false)) ?(desc="") ~names = custom ~names ~desc:("A bool. " ^ desc) ~default ~parse_value:parse_bool
-let float ?(default=None) ?(desc="") ~names = custom ~names ~desc:("A float. " ^ desc) ~default ~parse_value:(some float_of_string)
-let int ?(default=None) ?(desc="") ~names = custom ~names ~desc:("A int. " ^ desc) ~default ~parse_value:(some int_of_string)
-let string ?(default=None) ?(desc="") ~names = custom ~names ~desc:("A string. " ^ desc) ~default ~parse_value:(some (fun s -> s))
-let enum ?(default=None) ?(desc="") ~names ~values = custom ~names
-                                                            ~desc:(sprintf "Any of {%s}. %s" (String.concat ", " values) desc)
-                                                            ~default
-                                                            ~parse_value:(some (parse_enum values))
+let float ?default ?(desc="") ~names = custom ~names ~desc:("A float. " ^ desc) ~default ~parse_value:(some float_of_string)
+let int ?default ?(desc="") ~names = custom ~names ~desc:("A int. " ^ desc) ~default ~parse_value:(some int_of_string)
+let string ?default ?(desc="") ~names = custom ~names ~desc:("A string. " ^ desc) ~default ~parse_value:(some (fun s -> s))
+let bool ?default ?(desc="") ~names = custom ~names
+                                             ~desc:("A bool. " ^ desc)
+                                             ~default:(match default with Some _ -> default | None -> Some false)
+                                             ~parse_value:parse_bool
+let enum ?default ?(desc="") ~names ~values = custom ~names
+                                                     ~desc:(sprintf "Any of {%s}. %s" (String.concat ", " values) desc)
+                                                     ~default
+                                                     ~parse_value:(some (parse_enum values))
 
 let with_usage usage get_args =
   let fail str =
